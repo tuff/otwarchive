@@ -4,7 +4,7 @@
 
 When /^I leave kudos on "([^\"]*)"$/ do |work_title|
   step %{I view the work "#{work_title}"}
-  click_button("kudo_submit")
+  first(".js-kudo-submit").click
 end
 
 ### THEN
