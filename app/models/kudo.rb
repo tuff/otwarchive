@@ -23,12 +23,15 @@ class Kudo < ApplicationRecord
 
   after_destroy :update_work_stats
   after_create :after_create, :update_work_stats
-  def after_create
-    users = self.commentable.pseuds.map(&:user).uniq
 
-    users.each do |user|
-      if notify_user_by_email?(user)
-        RedisMailQueue.queue_kudo(user, self)
+  def after_create
+    if commentable.respond_to?(:pseuds)
+      users = commentable.pseuds.map(&:user).uniq
+
+      users.each do |user|
+        if notify_user_by_email?(user)
+          RedisMailQueue.queue_kudo(user, self)
+        end
       end
     end
   end
@@ -51,34 +54,35 @@ class Kudo < ApplicationRecord
     errors.values.to_s.match /already left kudos/
   end
 
-  def cannot_be_author
-    if pseud
-      commentable = nil
-      if commentable_type == "Work"
-       commentable = Work.find_by(id: commentable_id)
-      end
-      if commentable_type == "Chapter"
-       commentable = Chapter.find_by(id: commentable_id).work
-      end
-      kudos_giver = User.find_by(id: pseud.user_id)
-      if commentable.nil?
-        errors.add(:no_commentable,
-                   ts("^What did you want to leave kudos on?"))
-      elsif kudos_giver.is_author_of?(commentable)
-        errors.add(:cannot_be_author,
-                   ts("^You can't leave kudos on your own work."))
-      end
-    end
-  end
+  def cannot_be_author    
+    return if commentable_type == "AdminPost" || !pseud
 
-  def guest_cannot_kudos_restricted_work
     commentable = nil
+
     if commentable_type == "Work"
       commentable = Work.find_by(id: commentable_id)
     end
     if commentable_type == "Chapter"
       commentable = Chapter.find_by(id: commentable_id).work
     end
+    kudos_giver = User.find_by(id: pseud.user_id)
+    if commentable.nil?
+      errors.add(:no_commentable,
+                 ts("^What did you want to leave kudos on?"))
+    elsif kudos_giver.is_author_of?(commentable)
+      errors.add(:cannot_be_author,
+                 ts("^You can't leave kudos on your own work."))
+    end
+  end
+
+  def guest_cannot_kudos_restricted_work
+    return if commentable_type == "AdminPost"
+
+    commentable = {
+      "Work" => Work.find_by(id: commentable_id),
+      "Chapter" => Chapter.find_by(id: commentable_id).work
+    }[commentable_type]
+
     if commentable.nil?
       errors.add(:no_commentable,
                  ts("^What did you want to leave kudos on?"))

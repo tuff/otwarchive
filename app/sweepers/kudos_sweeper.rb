@@ -2,11 +2,16 @@ class KudosSweeper < ActionController::Caching::Sweeper
   observe Kudo
 
   def after_create(kudo)
-    if kudo.commentable_type == "Work"
+    path = {
+      "Work" => "works",
+      "AdminPost" => "admin_posts"
+    }[kudo.commentable_type]
+
+    if path
       # delete the cache entry for the total kudos count on the work
-      Rails.cache.delete "works/#{kudo.commentable_id}/kudos_count"
+      Rails.cache.delete "#{path}/#{kudo.commentable_id}/kudos_count"
       # if guest kudo, delete the cache entry for guest_kudos_count to avoid guest kudos being stuck
-      Rails.cache.delete "works/#{kudo.commentable_id}/guest_kudos_count" if kudo.pseud_id.nil?
+      Rails.cache.delete "#{path}/#{kudo.commentable_id}/guest_kudos_count" if kudo.pseud_id.nil?
     end
 
     # expire the cache for the kudos section in the view
