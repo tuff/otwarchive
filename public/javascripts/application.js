@@ -444,13 +444,16 @@ $j(document).ready(function() {
     $j('.kudos_expanded').hide();
   });
 
-  $j('#kudo_submit').on("click", function(event) {
+  $j('.js-kudo-submit').on("click", function(event) {
     event.preventDefault();
+    var $form = jQuery(this).closest('.js-new-kudo');
+    var $container = $form.closest('.group');
+    var $message = $container[0] ? $container.find('.js-kudos-message') : $j('.js-kudos-message');
 
     $j.ajax({
       type: 'POST',
       url: '/kudos.js',
-      data: jQuery('#new_kudo').serialize(),
+      data: $form.serialize(),
       error: function(jqXHR, textStatus, errorThrown ) {
         var msg = 'Sorry, we were unable to save your kudos';
         var data = $j.parseJSON(jqXHR.responseText);
@@ -465,11 +468,17 @@ $j(document).ready(function() {
         if (data.errors && data.errors.guest_on_restricted) {
           msg = "You can't leave guest kudos on a restricted work.";
         }
-
-        $j('#kudos_message').addClass('comment_error').text(msg);
+        $message.addClass('comment_error').text(msg);
       },
       success: function(data) {
-        $j('#kudos_message').addClass('notice').text('Thank you for leaving kudos!');
+        var $count = $form.find('.js-kudo-count');
+
+        if ($count[0]) {
+          var count = parseInt($count.text(), 10) || 0;
+          $count.text(++count).show();
+        }
+
+        $message.addClass('notice').text('Thank you for leaving kudos!');
       }
     });
   });

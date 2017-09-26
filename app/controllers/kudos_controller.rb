@@ -12,6 +12,8 @@ class KudosController < ApplicationController
 
   def create
     @kudo = Kudo.new(kudo_params)
+    commentable = @kudo.commentable
+
     if current_user.present?
       @kudo.pseud = current_user.default_pseud
     else
@@ -21,6 +23,7 @@ class KudosController < ApplicationController
     if @kudo.save
       respond_to do |format|
         format.html do
+          flash[:commentable_id] = commentable.id
           flash[:comment_notice] = ts("Thank you for leaving kudos!")
 
           redirect_to request.referer and return
@@ -37,7 +40,7 @@ class KudosController < ApplicationController
       respond_to do |format|
         format.html do
           error_message = "We couldn't save your kudos, sorry!"
-          commentable = @kudo.commentable
+
           if @kudo && @kudo.dup?
             error_message = @kudo.errors.full_messages.first
           end
@@ -47,6 +50,8 @@ class KudosController < ApplicationController
           if !current_user.present? && commentable.respond_to?(:restricted) && commentable.restricted?
             error_message = "You can't leave guest kudos on a restricted work."
           end
+
+          flash[:commentable_id] = commentable.id
           flash[:comment_error] = ts(error_message)
           redirect_to request.referer and return
         end

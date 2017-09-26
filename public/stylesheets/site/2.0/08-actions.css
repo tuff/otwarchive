@@ -205,4 +205,12 @@ dl.index p.actions {
   margin: 0;
 }
 
+.actions button[type=submit] .kudo-count::before {
+  content: '(';
+}
+
+.actions button[type=submit] .kudo-count::after {
+  content: ')';
+}
+
 /*END== */
