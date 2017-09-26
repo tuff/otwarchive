@@ -28,12 +28,12 @@
       <li><%= link_to ts('Back to AO3 News Index'), admin_posts_path %></li>
     <% end %>
 
-    <% if @work && !is_author_of?(@work) %>
+    <% if @admin_post || @work && !is_author_of?(@work) %>
       <li>
-        <%= form_for(:kudo, url: kudos_path, html: { method: 'post', id: 'new_kudo' }) do |kudo_form| %>
-          <%= kudo_form.hidden_field :commentable_id, :value => @work.id %>
-          <%= kudo_form.hidden_field :commentable_type, :value => 'Work' %>
-          <%= kudo_form.submit ts("Kudos ♥"), :id => 'kudo_submit' %>
+        <%= form_for(:kudo, url: kudos_path, html: { method: 'post', class: 'js-new-kudo' }) do |kudo_form| %>
+          <%= kudo_form.hidden_field :commentable_id, :value => (@work || @admin_post ).id %>
+          <%= kudo_form.hidden_field :commentable_type, :value => @admin_post ? 'AdminPost' : 'Work' %>
+          <%= kudo_form.submit ts("Kudos ♥"), :class => 'js-kudo-submit' %>
         <% end %>
       </li>
     <% end %>
@@ -68,8 +68,9 @@
 
   <%= flash_div :comment_error, :comment_notice %>
 
-  <% if @work && (@chapter.blank? || @chapter.posted?) %>
-    <%= render "kudos/kudos", :kudos => @kudos, :guest_kudos_count => @work.guest_kudos_count, :commentable => @work %>
+  <% item = @admin_post || @work %>
+  <% if @admin_post || (@work && (@chapter.blank? || @chapter.posted?)) %>
+    <%= render "kudos/kudos", :kudos => @kudos, :guest_kudos_count => item.guest_kudos_count, :commentable => item %>
   <% end %>
 
   <% if !logged_in? && (commentable.is_a?(Work) && commentable.anon_commenting_disabled || commentable.is_a?(Chapter) && commentable.work.anon_commenting_disabled) %>

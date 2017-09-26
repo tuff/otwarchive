@@ -35,6 +35,7 @@ class AdminPostsController < ApplicationController
     @commentable = @admin_post
     @comments = @admin_post.comments
     @page_subtitle = @admin_post.title.html_safe
+    @kudos = @admin_post.kudos.with_pseud.includes(pseud: :user).order('created_at DESC')
     respond_to do |format|
       format.html # show.html.erb
       format.js
