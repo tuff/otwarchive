@@ -126,10 +126,8 @@ Feature: Leave kudos
       And the email should contain "Awesome Story"
       And the email should contain "Another Awesome Story"
 
-  Scenario: Leave kudos on an admin post
+  Scenario: Leave kudos on an admin post when logged in
     Given I have posted an admin post
-
-    When I am logged out as an admin
       And I am logged in as "happyuser"
       And I go to the admin-posts page
       And I follow "Default Admin Post"
@@ -139,23 +137,25 @@ Feature: Leave kudos
       And I should see "happyuser left kudos on this post!"
     When I press "Kudos ♥"
     Then I should see "You have already left kudos here. :)"
-    When I log out
+    When kudos are sent
+    Then 0 emails should be delivered
+
+  Scenario: Leave kudos on an admin post when logged out
+    Given I have posted an admin post
+      And I am logged out
       And I go to the admin-posts page
       And I follow "Default Admin Post"
       And I press "Kudos ♥"
     Then I should see "Thank you for leaving kudos!"
-      And I should see "happyuser as well as 1 guest left kudos on this post!"
+      And I should see "1 guest left kudos on this post!"
     When I press "Kudos ♥"
     Then I should see "You have already left kudos here. :)"
-      And I should see "happyuser as well as 1 guest left kudos on this post!"
     When kudos are sent
     Then 0 emails should be delivered
 
   @javascript
-  Scenario: Leave kudos on an admin post via JS
+  Scenario: Leave kudos on an admin post via JS when logged in
     Given I have posted an admin post
-
-    When I am logged out as an admin
       And I am logged in as "happyuser"
       And I go to the admin-posts page
       And I follow "Default Admin Post"
@@ -165,22 +165,21 @@ Feature: Leave kudos
       And I should see "happyuser left kudos on this post!"
     When I press "Kudos ♥"
     Then I should see "You have already left kudos here. :)"
-    When I log out
+
+  @javascript
+  Scenario: Leave kudos on an admin post via JS when logged out
+    Given I have posted an admin post
+      And I am logged out
       And I go to the admin-posts page
       And I follow "Default Admin Post"
       And I press "Kudos ♥"
     Then I should see "Thank you for leaving kudos!"
-      And I should see "happyuser as well as 1 guest left kudos on this post!"
+      And I should see "1 guest left kudos on this post!"
     When I press "Kudos ♥"
     Then I should see "You have already left kudos here. :)"
-      And I should see "happyuser as well as 1 guest left kudos on this post!"
-    When kudos are sent
-    Then 0 emails should be delivered
 
-  Scenario: Leave kudos on an admin post from the index
+  Scenario: Leave kudos on an admin post from the index when logged in
     Given I have posted an admin post
-
-    When I am logged out as an admin
       And I am logged in as "happyuser"
       And I go to the admin-posts page
       And I press "Kudos ♥"
@@ -188,19 +187,20 @@ Feature: Leave kudos
       And I should see "Kudos ♥ 1"
     When I press "Kudos ♥ 1"
     Then I should see "You have already left kudos here. :)"
-    When I am logged out
+
+  Scenario: Leave kudos on an admin post from the index when logged out
+    Given I have posted an admin post
+      And I am logged out
       And I go to the admin-posts page
-      And I press "Kudos ♥ 1"
+      And I press "Kudos ♥"
     Then I should see "Thank you for leaving kudos!"
-      And I should see "Kudos ♥ 2"
-    When I press "Kudos ♥ 2"
+      And I should see "Kudos ♥ 1"
+    When I press "Kudos ♥ 1"
     Then I should see "You have already left kudos here. :)"
 
   @javascript
-  Scenario: Leave kudos on an admin post from the index via JS
+  Scenario: Leave kudos on an admin post from the index via JS when logged in
     Given I have posted an admin post
-
-    When I am logged out as an admin
       And I am logged in as "happyuser"
       And I go to the admin-posts page
       And I press "Kudos ♥"
@@ -208,10 +208,14 @@ Feature: Leave kudos
       And I should see "Kudos ♥ 1"
     When I press "Kudos ♥ 1"
     Then I should see "You have already left kudos here. :)"
-    When I am logged out
+
+  @javascript
+  Scenario: Leave kudos on an admin post from the index via JS when logged out
+    Given I have posted an admin post
+      And I am logged out
       And I go to the admin-posts page
-      And I press "Kudos ♥ 1"
+      And I press "Kudos ♥"
     Then I should see "Thank you for leaving kudos!"
-      And I should see "Kudos ♥ 2"
-    When I press "Kudos ♥ 2"
+      And I should see "Kudos ♥ 1"
+    When I press "Kudos ♥ 1"
     Then I should see "You have already left kudos here. :)"
